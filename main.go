@@ -56,3 +56,52 @@ func getCompanies(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	json.NewEncoder(w).Encode(companies)
 }
+
+// Get a phone company by ID (GET /companies/{id})
+func getCompanyByID(w http.ResponseWriter, r *http.Request) {
+	companyID, err := getIDFromURL(r.URL.Path)
+	if err != nil {
+		http.Error(w, "Invalid company ID", http.StatusBadRequest)
+		return
+	}
+
+	for _, company := range companies {
+		if company.ID == companyID {
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(company)
+			return
+		}
+	}
+
+	http.Error(w, "Company not found", http.StatusNotFound)
+}
+
+// Update a phone company (PUT /companies/{id})
+func updateCompany(w http.ResponseWriter, r *http.Request) {
+	companyID, err := getIDFromURL(r.URL.Path)
+	if err != nil {
+		http.Error(w, "Invalid company ID", http.StatusBadRequest)
+		return
+	}
+
+	var updatedCompany PhoneCompany
+	err = json.NewDecoder(r.Body).Decode(&updatedCompany)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	for i, company := range companies {
+		if company.ID == companyID {
+			companies[i].Name = updatedCompany.Name
+			companies[i].Country = updatedCompany.Country
+			companies[i].FoundedYear = updatedCompany.FoundedYear
+			companies[i].Description = updatedCompany.Description
+			w.Header().Set("Content-Type", "application/json")
+			json.NewEncoder(w).Encode(companies[i])
+			return
+		}
+	}
+
+	http.Error(w, "Company not found", http.StatusNotFound)
+}
