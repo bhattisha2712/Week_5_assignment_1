@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"log"
 	"net/http"
 	"strconv"
 	"strings"
@@ -142,4 +143,41 @@ func deleteCompany(w http.ResponseWriter, r *http.Request) {
 	}
 
 	http.Error(w, "Company not found", http.StatusNotFound)
+}
+
+// Main function
+func main() {
+	// Handle POST and GET (for all companies) on /companies
+	http.HandleFunc("/companies", func(w http.ResponseWriter, r *http.Request) {
+		if r.URL.Path != "/companies" {
+			http.Error(w, "404 not found", http.StatusNotFound)
+			return
+		}
+		switch r.Method {
+		case http.MethodPost:
+			createCompany(w, r)
+		case http.MethodGet:
+			getCompanies(w, r)
+		default:
+			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		}
+	})
+
+	// Handle GET, PUT, DELETE on /companies/{id}
+	http.HandleFunc("/companies/", func(w http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case http.MethodGet:
+			getCompanyByID(w, r)
+		case http.MethodPut:
+			updateCompany(w, r)
+		case http.MethodDelete:
+			deleteCompany(w, r)
+		default:
+			http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		}
+	})
+
+	// Start server
+	fmt.Println("Server running on port 8000")
+	log.Fatal(http.ListenAndServe(":8000", nil))
 }
