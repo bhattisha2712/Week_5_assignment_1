@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
+	"net/http"
 	"strconv"
 	"strings"
 )
@@ -25,4 +27,26 @@ func getIDFromURL(path string) (int, error) {
 		return 0, fmt.Errorf("invalid URL")
 	}
 	return strconv.Atoi(parts[2])
+}
+
+// Create a new phone company (POST /companies)
+func createCompany(w http.ResponseWriter, r *http.Request) {
+	if r.Method != http.MethodPost {
+		http.Error(w, "Invalid request method", http.StatusMethodNotAllowed)
+		return
+	}
+
+	var newCompany PhoneCompany
+	err := json.NewDecoder(r.Body).Decode(&newCompany)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	newCompany.ID = idCounter
+	idCounter++
+	companies = append(companies, newCompany)
+
+	w.WriteHeader(http.StatusCreated)
+	json.NewEncoder(w).Encode(newCompany)
 }
