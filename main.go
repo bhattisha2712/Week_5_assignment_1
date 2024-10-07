@@ -126,25 +126,6 @@ func deleteCompany(w http.ResponseWriter, r *http.Request) {
 	http.Error(w, "Company not found", http.StatusNotFound)
 }
 
-// Delete a phone company (DELETE /companies/{id})
-func deleteCompany(w http.ResponseWriter, r *http.Request) {
-	companyID, err := getIDFromURL(r.URL.Path)
-	if err != nil {
-		http.Error(w, "Invalid company ID", http.StatusBadRequest)
-		return
-	}
-
-	for i, company := range companies {
-		if company.ID == companyID {
-			companies = append(companies[:i], companies[i+1:]...)
-			w.WriteHeader(http.StatusNoContent)
-			return
-		}
-	}
-
-	http.Error(w, "Company not found", http.StatusNotFound)
-}
-
 // Main function
 func main() {
 	// Handle POST and GET (for all companies) on /companies
